@@ -100,3 +100,7 @@ Susbcribe to pack. Please see note about IDs above.
 ## maganeUnsubscribeToPack(id)
 
 Unsubscribe to pack. Please see note about IDs above.
+
+## Extra: Custom CSS
+
+If you use [Beard's Material Design](https://github.com/BeardDesign1/Material-design-theme-ressources) theme, you may want to check out my custom CSS here: [https://gist.github.com/BobbyWibowo/36bac94a1acc9bc868c2fadb8bba7f45](https://gist.github.com/BobbyWibowo/36bac94a1acc9bc868c2fadb8bba7f45).
