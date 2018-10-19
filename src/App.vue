@@ -191,17 +191,19 @@ export default {
 					// Do nothing
 				}
 			}
-			this.availablePacks.unshift(e);
-			this.saveToLocalStorage('magane.available', this.availablePacks);
-			if ((pack.id + "")[0] === "s" || (pack.id + "")[0] === "c") {
+			const index = this.availablePacks.findIndex((e) => e.id === id);
+			if (index >= 0) { return `Pack with id ${id} already exists`; }
+			if ((id + "")[0] === "s" || (id + "")[0] === "c") {
 				this.localPacks[id] = e;
 			}
-			return true
+			this.availablePacks.unshift(e);
+			this.saveToLocalStorage('magane.available', this.availablePacks);
+			return `Added a new pack with id ${id}`
 		},
 		appendPack: function(title, firstid, count, animated, template) {
 			if (template) {
 				// fail-safe, since this may happen often
-				return 'This function expects only 4 parameters, are you sure you do not want to use maganeAppendCustompack() instead?'
+				return 'This function expects only 4 parameters, are you sure you do not want to use maganeAppendCustompack() instead?';
 			}
 			var mid = "startswith-" + firstid;
 			var files = [];
@@ -224,7 +226,7 @@ export default {
 			// the stickers must be remotely stored as 1.png, 2.png, ..., n.png (one-based index)
 			// where the extension can also be .gif, in which case 'animated' must be set to true
 			// so all stickers in a single pack must have matching extension
-			if (!template) { return 'Missing URL template.' }
+			if (!template) { return 'Missing URL template'; }
 			var mid = "custom-" + id;
 			var files = [];
 			for (var i = 1; i <= count; i += 1) {
@@ -257,7 +259,6 @@ export default {
 				if ((id + "")[0] === "s" || (id + "")[0] === "c") {
 					delete this.localPacks[id];
 				}
-				return true;
 				return `Removed pack with id ${id} (old index: ${index})`;
 			}
 			return `Unable to find pack with id ${id}`;
