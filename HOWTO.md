@@ -1,5 +1,7 @@
 # HOWTO
 
+Download: [https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js](https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js).
+
 Magane now have 5 exposed functions that can be executed from the console:
 
 ```js
