@@ -1,3 +1,7 @@
+if (!global || !global._babelPolyfill) {
+	require('babel-polyfill');
+}
+
 import Vue from 'vue';
 import App from './App.vue';
 import Vuebar from 'vuebar';
@@ -9,6 +13,10 @@ Vue.use(VueScrollTo);
 let appendableElement = null;
 
 function prepareDOM() {
+	// Remove old elements, when reloaded by BetterDiscord
+	const old = appendableElement.querySelectorAll('div#magane');
+	if (old.length) { old.forEach(e => e.remove()); }
+
 	const maganeContainer = document.createElement('div');
 	maganeContainer.id = 'maganeContainer';
 	appendableElement.appendChild(maganeContainer);
@@ -20,7 +28,7 @@ function prepareDOM() {
 }
 
 let loadTimer = setInterval(() => {
-	appendableElement = document.querySelector('[class^="channelTextArea"] [class^="inner"]')
+	appendableElement = document.querySelector('[class^="channelTextArea-"] [class^="inner-"]')
 	|| document.querySelector('.channel-textarea-inner');
 	if (appendableElement !== null) {
 		clearInterval(loadTimer);

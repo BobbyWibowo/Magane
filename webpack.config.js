@@ -1,9 +1,8 @@
 var path = require('path');
 var webpack = require('webpack');
-require('babel-polyfill');
 
 module.exports = {
-	entry: ['babel-polyfill', './src/main.js'],
+	entry: ['./src/main.js'],
 	output: {
 		path: path.resolve(__dirname, './dist'),
 		publicPath: '/dist/',
@@ -65,7 +64,7 @@ module.exports = {
 		]
 	},
 	resolve: {
-		alias: { 'vue$': 'vue/dist/vue.esm.js' },
+		alias: { vue$: 'vue/dist/vue.esm.js' },
 		extensions: ['*', '.js', '.vue', '.json']
 	},
 	devServer: {
@@ -77,15 +76,12 @@ module.exports = {
 	devtool: '#eval-source-map'
 };
 
+// eslint-disable-next-line no-process-env
 if (process.env.NODE_ENV === 'production') {
 	module.exports.devtool = '#source-map';
 	// http://vue-loader.vuejs.org/en/workflow/production.html
 	module.exports.plugins = (module.exports.plugins || []).concat([
-		new webpack.DefinePlugin({
-			'process.env': {
-				NODE_ENV: '"production"'
-			}
-		}),
+		new webpack.DefinePlugin({ 'process.env': { NODE_ENV: '"production"' } }),
 		new webpack.optimize.UglifyJsPlugin({
 			sourceMap: true,
 			compress: { warnings: false }

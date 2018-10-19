@@ -102,7 +102,8 @@
 									<span>{{ pack.count }} stickers</span>
 								</div>
 								<div class="action">
-									<a class="button is-danger" @click="unsubscribeToPack(pack)">Del</a>
+									<a class="button is-primary" v-show="!subscribedPacksSimple.includes(pack.id)" @click="subscribeToPack(pack.id)">Add</a>
+									<a class="button is-danger" v-show="subscribedPacksSimple.includes(pack.id)" @click="unsubscribeToPack(pack.id)">Del</a>
 								</div>
 							</div>
 						</div>
@@ -119,8 +120,8 @@
 									<span>{{ pack.count }} stickers</span>
 								</div>
 								<div class="action">
-									<a class="button is-primary" v-show="!subscribedPacksSimple.includes(pack.id)" @click="subscribeToPack(pack)">Add</a>
-									<a class="button is-danger" v-show="subscribedPacksSimple.includes(pack.id)" @click="unsubscribeToPack(pack)">Del</a>
+									<a class="button is-primary" v-show="!subscribedPacksSimple.includes(pack.id)" @click="subscribeToPack(pack.id)">Add</a>
+									<a class="button is-danger" v-show="subscribedPacksSimple.includes(pack.id)" @click="unsubscribeToPack(pack.id)">Del</a>
 								</div>
 							</div>
 						</div>
@@ -138,6 +139,10 @@ export default {
 	mounted() {
 		console.log('Magane mounted on DOM');
 		window.maganeAppendPack = this.appendPack;
+		window.maganeAppendCustomPack = this.appendCustomPack;
+		window.maganeDeletePack = this.deletePack;
+		window.maganeSubscribeToPack = this.subscribeToPack;
+		window.maganeUnsubscribeToPack = this.unsubscribeToPack;
 		this.getLocalStorage();
 		this.checkAuth();
 		this.grabPacks();
@@ -177,12 +182,7 @@ export default {
 			localStorageIframe.id = 'localStorageIframe';
 			this.localStorage = document.body.appendChild(localStorageIframe).contentWindow.localStorage;
 		},
-		async appendPack(title, firstid, count) {
-			var mid = "startswith-" + firstid;
-			var files = [];
-			for (var i = firstid; i < (firstid + count); i += 1) {
-				files.push(i + ".png");
-			}
+		_appendPack: function(id, e) {
 			const availablePacks = this.localStorage.getItem('magane.available');
 			if (availablePacks) {
 				try {
@@ -191,15 +191,76 @@ export default {
 					// Do nothing
 				}
 			}
-			this.availablePacks.push({
-				"id": mid,
-				"files": files,
-				"uploadPath": "/home/kana/magane/packs/" + mid,
+			this.availablePacks.unshift(e);
+			this.saveToLocalStorage('magane.available', this.availablePacks);
+			if ((pack.id + "")[0] === "s" || (pack.id + "")[0] === "c") {
+				this.localPacks[id] = e;
+			}
+			return true
+		},
+		appendPack: function(title, firstid, count, animated, template) {
+			if (template) {
+				// fail-safe, since this may happen often
+				return 'This function expects only 4 parameters, are you sure you do not want to use maganeAppendCustompack() instead?'
+			}
+			var mid = "startswith-" + firstid;
+			var files = [];
+			for (var i = firstid; i < (firstid + count); i += 1) {
+				files.push(i + ".png");
+			}
+			return this._appendPack(mid, {
 				"name": title,
 				"count": count,
-				"dirlinked": true
+				"id": mid,
+				"animated": animated ? 1 : null,
+				"files": files
 			});
-			this.saveToLocalStorage('magane.available', this.availablePacks);
+		},
+		appendCustomPack: function(title, id, count, animated, template) {
+			// template: a url template, must have %id% and %pack%
+			// e.i. https://i.fiery.me/stickers/%pack%/%id%
+			// %pack% is the id you provide in this function (since it's the pack's id)
+			// %id% will then be replaced by sticker names
+			// the stickers must be remotely stored as 1.png, 2.png, ..., n.png (one-based index)
+			// where the extension can also be .gif, in which case 'animated' must be set to true
+			// so all stickers in a single pack must have matching extension
+			if (!template) { return 'Missing URL template.' }
+			var mid = "custom-" + id;
+			var files = [];
+			for (var i = 1; i <= count; i += 1) {
+				files.push(i + (animated ? ".gif" : ".png"));
+			}
+			return this._appendPack(mid, {
+				"name": title,
+				"count": count,
+				"id": mid,
+				"animated": animated ? 1 : null,
+				"files": files,
+				"template": template
+			});
+		},
+		deletePack: function(id) {
+			if (!id) { return false; }
+			// when deleting a custom pack, append id with "custom-", since it's stored that way
+			const availablePacks = this.localStorage.getItem('magane.available');
+			if (availablePacks) {
+				try {
+					this.availablePacks = JSON.parse(availablePacks);
+				} catch (ex) {
+					// Do nothing
+				}
+			}
+			const index = this.availablePacks.findIndex((e) => e.id === id);
+			if (index >= 0) {
+				this.availablePacks.splice(index, 1);
+				this.saveToLocalStorage('magane.available', this.availablePacks);
+				if ((id + "")[0] === "s" || (id + "")[0] === "c") {
+					delete this.localPacks[id];
+				}
+				return true;
+				return `Removed pack with id ${id} (old index: ${index})`;
+			}
+			return `Unable to find pack with id ${id}`;
 		},
 		async grabPacks() {
 			const response = await fetch('https://magane.moe/api/packs');
@@ -251,49 +312,74 @@ export default {
 					// Do nothing
 				}
 			}
+
+			// Map local packs by ids, so that we don't have to search everytime
+			this.localPacks = {};
+			this.availablePacks.forEach((e) => {
+				if ((e.id + "")[0] === "s" || (e.id + "")[0] === "c") {
+					this.localPacks[e.id] = e;
+				}
+			});
 		},
-		subscribeToPack: function(pack) {
-			if (this.subscribedPacks.includes(pack)) return;
+		subscribeToPack: function(id) {
+			const index = this.subscribedPacks.findIndex((e) => e.id === id);
+			if (index >= 0) { return false; }
+			const pack = this.availablePacks.find((e) => e.id === id);
+			if (!pack) { return false; }
 			this.subscribedPacks.push(pack);
 			this.subscribedPacksSimple.push(pack.id);
 			this.saveToLocalStorage('magane.subscribed', this.subscribedPacks);
+			return true;
 		},
-		unsubscribeToPack: function(pack) {
-			if (!this.subscribedPacks.includes(pack)) return;
-
-			for (let i = 0; i < this.subscribedPacks.length; i++) {
-				if (this.subscribedPacks[i].id === pack.id) {
-					this.subscribedPacks.splice(i, 1);
-					this.subscribedPacksSimple.splice(i, 1);
-				}
+		unsubscribeToPack: function(id) {
+			const index = this.subscribedPacks.findIndex((e) => e.id === id);
+			if (index >= 0) {
+				this.subscribedPacks.splice(index, 1);
+				this.subscribedPacksSimple.splice(index, 1);
+				this.saveToLocalStorage('magane.subscribed', this.subscribedPacks);
 			}
-
-			this.saveToLocalStorage('magane.subscribed', this.subscribedPacks);
+			return false;
 		},
 		saveToLocalStorage: function(key, payload) {
 			this.localStorage.setItem(key, JSON.stringify(payload));
 		},
 		formatURL: function(packId, sticker) {
+			/*
 			const a = "https://sdl-stickershop.line.naver.jp/stickershop/v1/sticker/";
 			const b = "/android/sticker.png;compress=true";
 			const c = "https://stickershop.line-scdn.net/stickershop/v1/product/";
 			const d = "/android/main@2x.png;compress=true";
+			*/
+			var template = 'https://stickershop.line-scdn.net/stickershop/v1/sticker/%id%/android/sticker.png;compress=true';
 			var url;
-			var sticker2 = sticker.split(".", 1)[0];
+			var sticker2 = sticker.split(".")[0];
             var packId2 = packId.split("-")[1];
-			if ((packId + "")[0] == "s") {
-				url = `${a}${sticker2}${b}`;
-				if ((sticker + "")[0] == "t") { // tab_on
+			if ((packId + "")[0] === "s") {
+				if ((sticker + "")[0] === "t") { // tab_on
 					// url = `${c}${packId}${d}`; // if we had the actual ID
-                    url = `${a}${packId2}${b}`;
+					// url = `${a}${packId2}${b}`;
+					url = template.replace(/%id%/g, packId2);
+				} else {
+					// url = `${a}${sticker2}${b}`;
+					url = template.replace(/%id%/g, sticker2);
+				}
+				if (this.localPacks[packId].animated) {
+					url = url.replace('sticker.png', 'sticker_animation.png');
+				}
+			} else if ((packId + "")[0] === "c") {
+				template = this.localPacks[packId].template;
+				if ((sticker + "")[0] === "t") { // tab_on
+					const first = this.localPacks[packId].files[0]
+					url = template.replace(/%pack%/g, packId2).replace(/%id%/g, first);
+				} else {
+					url = template.replace(/%pack%/g, packId2).replace(/%id%/g, sticker);
 				}
 			} else {
-				url = `${this.baseURL}/${packId}/${sticker2}_key.png`;
-				if ((sticker + "")[0] == "t") { // tab_on
-					url = `${this.baseURL}/${packId}/${sticker2}.png`;
+				url = `${this.baseURL}${packId}/${sticker}`;
+				if (!(`${sticker}`[0] === 't')) {
+					url.replace('.png', '_key.png');
 				}
 			}
-			console.log(url);
 			return url;
 		},
 		async sendSticker(packId, sticker, token = this.localStorage.token) {
@@ -301,14 +387,28 @@ export default {
 			if (this.onCooldown) return;
 			this.onCooldown = true;
 			this.stickerWindowActive = false;
+			/*
 			const a = "https://sdl-stickershop.line.naver.jp/stickershop/v1/sticker/";
 			const b = "/android/sticker.png;compress=true";
+			*/
+			/*
+			var template = 'https://stickershop.line-scdn.net/stickershop/v1/sticker/%id%/IOS/sticker@2x.png;compress=true';
 			var url;
 			if ((packId + "")[0] == "s") {
 				var sticker2 = sticker.split(".", 1)[0];
-				url = `${a}${sticker2}${b}`;
+				// url = `${a}${sticker2}${b}`;
+				url = template.replace(/%id%/g, sticker2);
 			} else {
-				url = `${this.baseURL}/${packId}/${sticker}`;
+				url = `${this.baseURL}${packId}/${sticker}`;
+			}
+			*/
+			var url = this.formatURL(packId, sticker);
+			if (url.includes('sticker_animation.png')) {
+				sticker = sticker.split(".")[0] + ".gif";
+			}
+			if ((packId + "")[0] === "c") {
+				// obfuscate file name of custom packs by using current timestamp
+				sticker = Date.now() + "." + sticker.split(".")[1];
 			}
 			const response = await fetch(url, { cache: 'force-cache' });
 			const myBlob = await response.blob();
@@ -356,23 +456,23 @@ export default {
 			const gateway = await fetch('https://discordapp.com/api/v7/gateway');
 			const gatewayJson = await gateway.json();
 			const wss = new WebSocket(`${gatewayJson.url}/?encoding=json&v6`);
-			wss.onerror = error => console.error(error); // eslint-disable-line no-console
+			wss.onerror = error => console.error(error);
 			wss.onmessage = message => {
 				try {
 					const json = JSON.parse(message.data);
 					this.localStorage.canCallAPI = true;
-					json.op === 0 && json.t === 'READY' && wss.close(); // eslint-disable-line no-unused-expressions
-					json.op === 10 && wss.send(JSON.stringify({ // eslint-disable-line no-unused-expressions
+					json.op === 0 && json.t === 'READY' && wss.close();
+					json.op === 10 && wss.send(JSON.stringify({
 						op: 2,
-						d: { // eslint-disable-line id-length
+						d: {
 							token,
 							properties: { $browser: 'b1nzy is a meme' },
-							large_threshold: 50 // eslint-disable-line camelcase
+							large_threshold: 50
 						}
 					}));
-					console.log('Sucessful authenticated. You can now make REST request!'); // eslint-disable-line no-console
+					console.log('Sucessful authenticated. You can now make REST request!');
 				} catch (error) {
-					console.error(error); // eslint-disable-line no-console
+					console.error(error);
 				}
 			};
 		}

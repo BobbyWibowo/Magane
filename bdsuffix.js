@@ -1,3 +1,3 @@
 
-setTimeout(() => { magane.appendPack = maganeAppendPack; }, 10000);
+// setTimeout(() => { magane.appendPack = maganeAppendPack; }, 10000);
 };

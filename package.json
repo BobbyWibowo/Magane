@@ -55,7 +55,15 @@
       "node": true
     },
     "rules": {
-      "func-names": 0
+      "camelcase": 0,
+      "func-names": 0,
+      "id-length": 0,
+      "no-new": 0
     }
-  }
+  },
+  "eslintIgnore": [
+    "bdprefix.js",
+    "bdsuffix.js",
+    "magane.plugin.js"
+  ]
 }
