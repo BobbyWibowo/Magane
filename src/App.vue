@@ -20,9 +20,7 @@
 							v-bind:style="{ 'background-image': 'url(' + formatURL(sticker.pack, sticker.id) + ')' }"
 							@click="sendSticker(sticker.pack, sticker.id)"></div>
 						<div class="deleteFavorite" @click="unfavoriteSticker(sticker.pack, sticker.id)">
-							<svg width="20" height="20" viewBox="0 0 24 24">
-								<path fill="grey" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path>
-							</svg>
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="red" d="M12 1.5C6.21 1.5 1.5 6.21 1.5 12S6.21 22.5 12 22.5 22.5 17.79 22.5 12 17.79 1.5 12 1.5z"/><path fill="#fff" d="M10.5 6.5v4h-4v3h4v4h3v-4h4v-3h-4v-4z"/></svg>
 						</div>
 					</div>
 				</div>
@@ -34,10 +32,11 @@
 						<div class="image"
 							v-bind:style="{ 'background-image': 'url(' + formatURL(pack.id, sticker) + ')' }"
 							@click="sendSticker(pack.id, sticker)"></div>
-						<div class="addFavorite" @click="favoriteSticker(pack.id, sticker)">
-							<svg width="20" height="20" viewBox="0 0 24 24">
-								<path fill="grey" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path>
-							</svg>
+						<div class="addFavorite" v-show="!favoriteStickersSimple.includes(`${pack.id}:${sticker}`)" @click="favoriteSticker(pack.id, sticker)">
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="green" d="M12 1.5C6.21 1.5 1.5 6.21 1.5 12S6.21 22.5 12 22.5 22.5 17.79 22.5 12 17.79 1.5 12 1.5z"/><path fill="#fff" d="M10.5 6.5v4h-4v3h4v4h3v-4h4v-3h-4v-4z"/></svg>
+						</div>
+						<div class="deleteFavorite" v-show="favoriteStickersSimple.includes(`${pack.id}:${sticker}`)" @click="unfavoriteSticker(pack.id, sticker)">
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="red" d="M12 1.5C6.21 1.5 1.5 6.21 1.5 12S6.21 22.5 12 22.5 22.5 17.79 22.5 12 17.79 1.5 12 1.5z"/><path fill="#fff" d="M10.5 6.5v4h-4v3h4v4h3v-4h4v-3h-4v-4z"/></svg>
 						</div>
 					</div>
 				</div>
@@ -91,9 +90,11 @@
 						<div class="tab" @click="activeTab = 0" v-bind:class="{ 'is-active': activeTab == 0 }">Installed</div>
 						<div class="tab" @click="activeTab = 1" v-bind:class="{ 'is-active': activeTab == 1 }">Packs</div>
 					</div>
+
 					<div v-bar class="vuebar-element">
 						<div class="tabContent" v-show="activeTab == 0">
-							<div class="pack" v-for="pack in subscribedPacks" v-bind:key="pack.id">
+							<input class="inputQuery" type="text" v-bind:value="filterSubQuery" v-on:input="filterSubQuery = $event.target.value" v-on:click="focus" placeholder="Search"/>
+							<div class="pack" v-for="pack in filteredSubs" v-bind:key="pack.id">
 								<div class="preview"
 									v-bind:style="{ 'background-image': 'url(' + formatURL(pack.id, pack.files[0]) + ')' }">
 								</div>
@@ -111,7 +112,8 @@
 
 					<div v-bar class="vuebar-element">
 						<div class="tabContent" v-show="activeTab == 1">
-							<div class="pack" v-for="pack in availablePacks" v-bind:key="pack.id">
+							<input class="inputQuery" type="text" v-bind:value="filterPackQuery" v-on:input="filterPackQuery = $event.target.value" v-on:click="focus" placeholder="Search"/>
+							<div class="pack" v-for="pack in filteredPacks" v-bind:key="pack.id">
 								<div class="preview"
 									v-bind:style="{ 'background-image': 'url(' + formatURL(pack.id, pack.files[0]) + ')' }">
 								</div>
@@ -133,7 +135,7 @@
 </template>
 
 <script>
-const baseURL = '';
+// const baseURL = '';
 export default {
 	name: 'app',
 	mounted() {
@@ -163,27 +165,51 @@ export default {
 			subscribedPacks: [],
 			subscribedPacksSimple: [],
 			favoriteStickers: [],
+			favoriteStickersSimple: [],
 			onCooldown: false,
 			localStorage: null,
 			activeTab: 0,
-			lastKnownLocation: null
-		}
+			lastKnownLocation: null,
+			filterPackQuery: '',
+			filterSubQuery: ''
+		};
 	},
 	methods: {
-		restoreDom: function() {
+		restoreDom() {
 			const appendableElement = document.querySelector('[class^="channelTextArea"] [class^="inner"]')
 			|| document.querySelector('.channel-textarea-inner');
 			if (appendableElement !== null) {
 				appendableElement.appendChild(this.$el);
 			}
 		},
-		getLocalStorage: function() {
+		getLocalStorage() {
 			const localStorageIframe = document.createElement('iframe');
 			localStorageIframe.id = 'localStorageIframe';
 			this.localStorage = document.body.appendChild(localStorageIframe).contentWindow.localStorage;
-			this.token = this.localStorage.token // opening console/devtools hides token from local storage
+			// Hold in a separate local var since opening console/devtools will hide token from local storage
+			this.token = this.localStorage.token;
 		},
-		_appendPack: function(id, e) {
+		_toast(message, options) {
+			if (!BdApi || typeof BdApi.showToast !== 'function') return;
+			return BdApi.showToast(message, options);
+		},
+		_info(message, options = {}) {
+			options.type = 'info';
+			this._toast(message, options);
+		},
+		_success(message, options = {}) {
+			options.type = 'success';
+			this._toast(message, options);
+		},
+		_error(message, options = {}) {
+			options.type = 'error';
+			this._toast(message, options);
+		},
+		_warn(message, options = {}) {
+			options.type = 'warn';
+			this._toast(message, options);
+		},
+		_appendPack(id, e) {
 			const availablePacks = this.localStorage.getItem('magane.available');
 			if (availablePacks) {
 				try {
@@ -192,53 +218,56 @@ export default {
 					// Do nothing
 				}
 			}
-			const index = this.availablePacks.findIndex((e) => e.id === id);
-			if (index >= 0) { return `Pack with id ${id} already exists`; }
-			if ((id + "")[0] === "s" || (id + "")[0] === "c") {
+
+			const index = this.availablePacks.findIndex(p => p.id === id);
+			if (index >= 0) return `Pack with id ${id} already exists`;
+			if (id.startsWith('startswith-') || id.startsWith('custom-')) {
 				this.localPacks[id] = e;
 			}
+
 			this.availablePacks.unshift(e);
 			this.saveToLocalStorage('magane.available', this.availablePacks);
-			return `Added a new pack with id ${id}`
+			return `Added a new pack with id ${id}`;
 		},
-		appendPack: function(title, firstid, count, animated, template) {
+		appendPack(title, firstid, count, animated, template) {
 			if (template) {
-				// fail-safe, since this may happen often
-				return 'This function expects only 4 parameters, are you sure you do not want to use maganeAppendCustompack() instead?';
+				// Fail-safe, since this may happen often
+				return 'This function expects only 4 parameters';
 			}
-			var mid = "startswith-" + firstid;
-			var files = [];
-			for (var i = firstid; i < (firstid + count); i += 1) {
-				files.push(i + ".png");
+			const mid = `startswith-${firstid}`;
+			const files = [];
+			for (let i = firstid; i < (firstid + count); i += 1) {
+				files.push(`${i}.png`);
 			}
 			return this._appendPack(mid, {
-				"name": title,
-				"count": count,
-				"id": mid,
-				"animated": animated ? 1 : null,
-				"files": files
+				name: title,
+				count: count,
+				id: mid,
+				animated: animated ? 1 : null,
+				files: files
 			});
 		},
-		appendCustomPack: function(title, id, count, animated, template) {
+		appendCustomPack(title, id, count, animated, template) {
+			// eslint-disable-next-line max-len
 			// https://github.com/BobbyWibowo/Magane/blob/master/HOWTO.md#maganeappendcustompacktitle-id-count-animated-template
-			if (!template) { return 'Missing URL template'; }
-			var mid = "custom-" + id;
-			var files = [];
-			for (var i = 1; i <= count; i += 1) {
-				files.push(i + (animated ? ".gif" : ".png"));
+			if (!template) return 'Missing URL template';
+			const mid = `custom-${id}`;
+			const files = [];
+			for (let i = 1; i <= count; i += 1) {
+				files.push(i + (animated ? '.gif' : '.png'));
 			}
 			return this._appendPack(mid, {
-				"name": title,
-				"count": count,
-				"id": mid,
-				"animated": animated ? 1 : null,
-				"files": files,
-				"template": template
+				name: title,
+				count: count,
+				id: mid,
+				animated: animated ? 1 : null,
+				files: files,
+				template: template
 			});
 		},
-		deletePack: function(id) {
-			if (!id) { return false; }
-			// when deleting a custom pack, append id with "custom-", since it's stored that way
+		deletePack(id) {
+			if (!id) return false;
+
 			const availablePacks = this.localStorage.getItem('magane.available');
 			if (availablePacks) {
 				try {
@@ -247,16 +276,16 @@ export default {
 					// Do nothing
 				}
 			}
-			const index = this.availablePacks.findIndex((e) => e.id === id);
-			if (index >= 0) {
-				this.availablePacks.splice(index, 1);
-				this.saveToLocalStorage('magane.available', this.availablePacks);
-				if ((id + "")[0] === "s" || (id + "")[0] === "c") {
-					delete this.localPacks[id];
-				}
-				return `Removed pack with id ${id} (old index: ${index})`;
+
+			const index = this.availablePacks.findIndex(e => e.id === id);
+			if (index === -1) return `Unable to find pack with id ${id}`;
+
+			this.availablePacks.splice(index, 1);
+			this.saveToLocalStorage('magane.available', this.availablePacks);
+			if (id.startsWith('startswith-') || id.startsWith('custom-')) {
+				delete this.localPacks[id];
 			}
-			return `Unable to find pack with id ${id}`;
+			return `Removed pack with id ${id} (old index: ${index})`;
 		},
 		async grabPacks() {
 			const response = await fetch('https://magane.moe/api/packs');
@@ -275,8 +304,8 @@ export default {
 				this.availablePacks = packs.packs;
 			} else {
 				var aaa = [];
-				this.availablePacks.forEach((e) => aaa.push(e.id));
-				packs.packs.forEach((e) => {
+				this.availablePacks.forEach(e => aaa.push(e.id));
+				packs.packs.forEach(e => {
 					while (aaa.indexOf(e.id) >= 0) {
 						var uuu = aaa.indexOf(e.id);
 						aaa.splice(uuu, 1);
@@ -286,7 +315,7 @@ export default {
 				});
 			}
 			this.saveToLocalStorage('magane.available', this.availablePacks);
-			this.stickerfaces
+			this.stickerfaces;
 
 			const subscribedPacks = this.localStorage.getItem('magane.subscribed');
 			if (subscribedPacks) {
@@ -304,6 +333,9 @@ export default {
 			if (favoriteStickers) {
 				try {
 					this.favoriteStickers = JSON.parse(favoriteStickers);
+					for (let favedPacks of this.favoriteStickers) {
+						this.favoriteStickersSimple.push(`${favedPacks.pack}:${favedPacks.id}`);
+					}
 				} catch (ex) {
 					// Do nothing
 				}
@@ -311,68 +343,60 @@ export default {
 
 			// Map local packs by ids, so that we don't have to search everytime
 			this.localPacks = {};
-			this.availablePacks.forEach((e) => {
-				if ((e.id + "")[0] === "s" || (e.id + "")[0] === "c") {
+			this.availablePacks.forEach(e => {
+				if (e.id.startsWith('startswith-') || e.id.startsWith('custom-')) {
 					this.localPacks[e.id] = e;
 				}
 			});
 		},
-		subscribeToPack: function(id) {
-			const index = this.subscribedPacks.findIndex((e) => e.id === id);
-			if (index >= 0) { return false; }
-			const pack = this.availablePacks.find((e) => e.id === id);
-			if (!pack) { return false; }
+		subscribeToPack(id) {
+			const index = this.subscribedPacks.findIndex(e => e.id === id);
+			if (index >= 0) return false;
+
+			const pack = this.availablePacks.find(e => e.id === id);
+			if (!pack) return false;
+
 			this.subscribedPacks.push(pack);
 			this.subscribedPacksSimple.push(pack.id);
 			this.saveToLocalStorage('magane.subscribed', this.subscribedPacks);
 			return true;
 		},
-		unsubscribeToPack: function(id) {
-			const index = this.subscribedPacks.findIndex((e) => e.id === id);
-			if (index >= 0) {
-				this.subscribedPacks.splice(index, 1);
-				this.subscribedPacksSimple.splice(index, 1);
-				this.saveToLocalStorage('magane.subscribed', this.subscribedPacks);
-			}
-			return false;
+		unsubscribeToPack(id) {
+			const index = this.subscribedPacks.findIndex(e => e.id === id);
+			if (index === -1) return false;
+
+			this.subscribedPacks.splice(index, 1);
+			this.subscribedPacksSimple.splice(index, 1);
+			this.saveToLocalStorage('magane.subscribed', this.subscribedPacks);
+			return true;
 		},
-		saveToLocalStorage: function(key, payload) {
+		saveToLocalStorage(key, payload) {
 			this.localStorage.setItem(key, JSON.stringify(payload));
 		},
-		formatURL: function(packId, sticker) {
-			/*
-			const a = "https://sdl-stickershop.line.naver.jp/stickershop/v1/sticker/";
-			const b = "/android/sticker.png;compress=true";
-			const c = "https://stickershop.line-scdn.net/stickershop/v1/product/";
-			const d = "/android/main@2x.png;compress=true";
-			*/
-			var template = 'https://stickershop.line-scdn.net/stickershop/v1/sticker/%id%/android/sticker.png;compress=true';
-			var url;
-			var sticker2 = sticker.split(".")[0];
-            var packId2 = packId.split("-")[1];
-			if ((packId + "")[0] === "s") {
-				if ((sticker + "")[0] === "t") { // tab_on
-					// url = `${c}${packId}${d}`; // if we had the actual ID
-					// url = `${a}${packId2}${b}`;
-					url = template.replace(/%id%/g, packId2);
+		formatURL(packId, sticker) {
+			let url;
+			if (packId.startsWith('startswith-')) {
+				// eslint-disable-next-line max-len
+				const template = 'https://stickershop.line-scdn.net/stickershop/v1/sticker/%id%/android/sticker.png;compress=true';
+				if (sticker === 'tab_on.png') {
+					url = template.replace(/%id%/g, packId.split('-')[1]);
 				} else {
-					// url = `${a}${sticker2}${b}`;
-					url = template.replace(/%id%/g, sticker2);
+					url = template.replace(/%id%/g, sticker.split('.')[0]);
 				}
 				if (this.localPacks[packId].animated) {
 					url = url.replace('sticker.png', 'sticker_animation.png');
 				}
-			} else if ((packId + "")[0] === "c") {
-				template = this.localPacks[packId].template;
-				if ((sticker + "")[0] === "t") { // tab_on
-					const first = this.localPacks[packId].files[0]
-					url = template.replace(/%pack%/g, packId2).replace(/%id%/g, first);
+			} else if (packId.startsWith('custom-')) {
+				const template = this.localPacks[packId].template;
+				if (sticker === 'tab_on.png') {
+					const first = this.localPacks[packId].files[0];
+					url = template.replace(/%pack%/g, packId.split('-')[1]).replace(/%id%/g, first);
 				} else {
-					url = template.replace(/%pack%/g, packId2).replace(/%id%/g, sticker);
+					url = template.replace(/%pack%/g, packId.split('-')[1]).replace(/%id%/g, sticker);
 				}
 			} else {
 				url = `${this.baseURL}${packId}/${sticker}`;
-				if (!(`${sticker}`[0] === 't')) {
+				if (sticker !== 'tab_on.png') {
 					url.replace('.png', '_key.png');
 				}
 			}
@@ -380,38 +404,29 @@ export default {
 		},
 		async sendSticker(packId, sticker, token = this.token) {
 			const channel = window.location.href.split('/').slice(-1)[0];
-			if (this.onCooldown) return;
+			if (this.onCooldown) return this._error('Sending sticker is on cooldown!', { timeout: 1000 });
+
 			this.onCooldown = true;
 			this.stickerWindowActive = false;
-			/*
-			const a = "https://sdl-stickershop.line.naver.jp/stickershop/v1/sticker/";
-			const b = "/android/sticker.png;compress=true";
-			*/
-			/*
-			var template = 'https://stickershop.line-scdn.net/stickershop/v1/sticker/%id%/IOS/sticker@2x.png;compress=true';
-			var url;
-			if ((packId + "")[0] == "s") {
-				var sticker2 = sticker.split(".", 1)[0];
-				// url = `${a}${sticker2}${b}`;
-				url = template.replace(/%id%/g, sticker2);
-			} else {
-				url = `${this.baseURL}${packId}/${sticker}`;
-			}
-			*/
+
 			var url = this.formatURL(packId, sticker);
 			if (url.includes('sticker_animation.png')) {
-				sticker = sticker.split(".")[0] + ".gif";
+				sticker = `${sticker.split('.')[0]}.gif`;
 			}
-			if ((packId + "")[0] === "c") {
-				// obfuscate file name of custom packs by using current timestamp
-				sticker = Date.now() + "." + sticker.split(".")[1];
+			if (packId.startsWith('custom-')) {
+				// Obfuscate file name of custom packs by using timestamp
+				sticker = `${Date.now().toString().slice(-7)}.${sticker.split('.')[1]}`;
 			}
+
 			const response = await fetch(url, { cache: 'force-cache' });
 			const myBlob = await response.blob();
 			const formData = new FormData();
+
 			formData.append('file', myBlob, sticker);
 			token = token.replace(/"/ig, '');
 			token = token.replace(/^Bot\s*/i, '');
+
+			this._info('Sending sticker\u2026', { timeout: 1000 });
 			fetch(`https://discordapp.com/api/channels/${channel}/messages`, {
 				headers: { Authorization: token },
 				method: 'POST',
@@ -419,39 +434,37 @@ export default {
 			});
 			setTimeout(() => this.onCooldown = false, 1000); // eslint-disable-line no-return-assign
 		},
-		favoriteSticker: function(packId, sticker) {
-			for (let favorite of this.favoriteStickers) {
-				if (favorite.id === sticker) return
-			}
+		favoriteSticker(packId, sticker) {
+			const found = this.favoriteStickers.find(s => s.id === sticker && s.pack === packId);
+			if (found) return this._error('Sticker is already in favorites.');
 
-			const favorite = { pack: packId, id: sticker }
+			const favorite = { pack: packId, id: sticker };
 			this.favoriteStickers.push(favorite);
+			this.favoriteStickersSimple.push(`${packId}:${sticker}`);
 			this.saveToLocalStorage('magane.favorites', this.favoriteStickers);
+			this._success('Added sticker to favorites.');
 		},
-		unfavoriteSticker: function(packId, sticker) {
-			let found = false;
-			for (let favorite of this.favoriteStickers) {
-				if (favorite.id === sticker) found = true;
-			}
+		unfavoriteSticker(packId, sticker) {
+			console.log(packId, sticker);
+			const index = this.favoriteStickers.findIndex(s => s.id === sticker && s.pack === packId);
+			if (index === -1) return this._error('Sticker is not in favorites.');
 
-			if (!found) return;
-
-			for (let i = 0; i < this.favoriteStickers.length; i++) {
-				if (this.favoriteStickers[i].id === sticker) {
-					this.favoriteStickers.splice(i, 1);
-				}
-			}
-
+			this.favoriteStickers.splice(index, 1);
+			this.favoriteStickersSimple.splice(index, 1);
 			this.saveToLocalStorage('magane.favorites', this.favoriteStickers);
+			this._success('Removed sticker from favorites.');
 		},
 		async checkAuth(token = this.token) {
 			if (this.localStorage.canCallAPI) return;
 			if (typeof token !== 'string') throw new Error('Not a token, buddy.');
+
 			token = token.replace(/"/ig, '');
 			token = token.replace(/^Bot\s*/i, '');
+
 			const gateway = await fetch('https://discordapp.com/api/v7/gateway');
 			const gatewayJson = await gateway.json();
 			const wss = new WebSocket(`${gatewayJson.url}/?encoding=json&v6`);
+
 			wss.onerror = error => console.error(error);
 			wss.onmessage = message => {
 				try {
@@ -471,6 +484,10 @@ export default {
 					console.error(error);
 				}
 			};
+		},
+		focus(event) {
+			event.stopPropagation();
+			// event.focus();
 		}
 	},
 	computed: {
@@ -479,6 +496,16 @@ export default {
 		},
 		favorites() {
 			return this.$store.state.favorites;
+		},
+		filteredPacks() {
+			return this.availablePacks.filter(pack => {
+				return pack.name.toLowerCase().indexOf(this.filterPackQuery.toLowerCase()) >= 0;
+			})
+		},
+		filteredSubs() {
+			return this.subscribedPacks.filter(pack => {
+				return pack.name.toLowerCase().indexOf(this.filterSubQuery.toLowerCase()) >= 0;
+			})
 		}
 	}
 };
@@ -557,7 +584,7 @@ drag.prototype = {
 		position: absolute;
 		top: 12px !important;
 		right: 45px;
-		//background-color: red;
+		// background-color: red;
 		background-image: url('/assets/f24711dae4f6d6b28335e866a93e9d9b.png');
 		width: 22px;
 		height: 22px;
@@ -679,18 +706,21 @@ drag.prototype = {
 		width: 20px;
 		height: 20px;
 		position: absolute;
-		right: 0;
+		top: 3px;
+		right: 3px;
 		transition: all .2s ease;
 		display: none;
 		z-index: 2;
 	}
 
+	/*
 	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.addFavorite {
 		bottom: 0;
 	}
+	*/
 
 	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.deleteFavorite {
-		top: 0px;
+		/* top: 0px; */
 		transform: rotateZ(45deg);
 	}
 
@@ -700,19 +730,31 @@ drag.prototype = {
 	}
 
 	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.addFavorite:hover {
-		transform: scale(1.25);
-		-webkit-transform: scale(1.25);
+		transform: scale(1.3);
+		-webkit-transform: scale(1.3);
 	}
 	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.deleteFavorite:hover {
-		transform: scale(1.25) rotateZ(45deg);
-		-webkit-transform: scale(1.25) rotateZ(45deg);
+		transform: scale(1.3) rotateZ(45deg);
+		-webkit-transform: scale(1.3) rotateZ(45deg);
 	}
 
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.addFavorite:hover svg path,
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.deleteFavorite:hover svg path {
+	/*
+	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.addFavorite:hover svg path:nth-child(1),
+	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.deleteFavorite:hover svg path:nth-child(1) {
 		transition: all .2s ease;
 		fill: white;
 	}
+
+	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.addFavorite:hover svg path:nth-child(2) {
+		transition: all .2s ease;
+		fill: green;
+	}
+
+	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.deleteFavorite:hover svg path:nth-child(2) {
+		transition: all .2s ease;
+		fill: red;
+	}
+	*/
 
 	div#magane div.stickerWindow > div.packs {
 		position: absolute;
@@ -950,6 +992,20 @@ drag.prototype = {
 
 	div#magane div.stickersModal .modal .animation-content {
 		margin: 0 20px;
+	}
+
+	div#magane div.stickersModal .inputQuery {
+		width: calc(100% - 20px);
+		float: left;
+		display: flex;
+		height: 36px;
+		box-sizing: border-box;
+		margin-left: 15px;
+		margin-bottom: 10px;
+		padding: 5px 12px;
+		border-radius: 3px;
+		border: 1px solid $darkerBackground;
+		color: #151617;
 	}
 
 	div#magane .tabs {
