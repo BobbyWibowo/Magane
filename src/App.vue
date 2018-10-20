@@ -181,6 +181,7 @@ export default {
 			const localStorageIframe = document.createElement('iframe');
 			localStorageIframe.id = 'localStorageIframe';
 			this.localStorage = document.body.appendChild(localStorageIframe).contentWindow.localStorage;
+			this.token = this.localStorage.token // opening console/devtools hides token from local storage
 		},
 		_appendPack: function(id, e) {
 			const availablePacks = this.localStorage.getItem('magane.available');
@@ -219,13 +220,7 @@ export default {
 			});
 		},
 		appendCustomPack: function(title, id, count, animated, template) {
-			// template: a url template, must have %id% and %pack%
-			// e.i. https://i.fiery.me/stickers/%pack%/%id%
-			// %pack% is the id you provide in this function (since it's the pack's id)
-			// %id% will then be replaced by sticker names
-			// the stickers must be remotely stored as 1.png, 2.png, ..., n.png (one-based index)
-			// where the extension can also be .gif, in which case 'animated' must be set to true
-			// so all stickers in a single pack must have matching extension
+			// https://github.com/BobbyWibowo/Magane/blob/master/HOWTO.md#maganeappendcustompacktitle-id-count-animated-template
 			if (!template) { return 'Missing URL template'; }
 			var mid = "custom-" + id;
 			var files = [];
@@ -383,7 +378,7 @@ export default {
 			}
 			return url;
 		},
-		async sendSticker(packId, sticker, token = this.localStorage.token) {
+		async sendSticker(packId, sticker, token = this.token) {
 			const channel = window.location.href.split('/').slice(-1)[0];
 			if (this.onCooldown) return;
 			this.onCooldown = true;
@@ -449,7 +444,7 @@ export default {
 
 			this.saveToLocalStorage('magane.favorites', this.favoriteStickers);
 		},
-		async checkAuth(token = this.localStorage.token) {
+		async checkAuth(token = this.token) {
 			if (this.localStorage.canCallAPI) return;
 			if (typeof token !== 'string') throw new Error('Not a token, buddy.');
 			token = token.replace(/"/ig, '');
