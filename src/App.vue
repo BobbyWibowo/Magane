@@ -426,7 +426,7 @@ export default {
 			token = token.replace(/"/ig, '');
 			token = token.replace(/^Bot\s*/i, '');
 
-			this._info('Sending sticker\u2026', { timeout: 1000 });
+			this._toast('Sending sticker\u2026', { timeout: 1000 });
 			fetch(`https://discordapp.com/api/channels/${channel}/messages`, {
 				headers: { Authorization: token },
 				method: 'POST',
