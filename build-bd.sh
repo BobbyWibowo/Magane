@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# run as "NODE_ENV=production ./build-bd.sh" to minify
 function _webpack() {
 	if hash webpack 2>/dev/null; then
 		webpack "$@"

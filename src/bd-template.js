@@ -7,9 +7,11 @@ class magane {
 
 	getDescription() { return 'Bringing LINE stickers to Discord in a chaotic way.'; }
 
-	getVersion() { return '0.1.0-dev'; }
+	getVersion() { return '0.1.1'; }
 
 	getAuthor() { return 'Kana'; }
+
+	getUpdateLink() { return 'https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js'; }
 
 	start() {
 		// eslint-disable-next-line no-unused-vars

@@ -266,7 +266,9 @@ export default {
 			});
 		},
 		deletePack(id) {
-			if (!id) return false;
+			if (!id || !id.startsWith('startswith-') || !id.startsWith('custom-')) {
+				return `Id must start with either "startswith-" or "custom-"`;
+			}
 
 			const availablePacks = this.localStorage.getItem('magane.available');
 			if (availablePacks) {
@@ -279,6 +281,9 @@ export default {
 
 			const index = this.availablePacks.findIndex(e => e.id === id);
 			if (index === -1) return `Unable to find pack with id ${id}`;
+
+			// Force unsubscribe
+			this.unsubscribeToPack(id);
 
 			this.availablePacks.splice(index, 1);
 			this.saveToLocalStorage('magane.available', this.availablePacks);
