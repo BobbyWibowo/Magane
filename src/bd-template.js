@@ -7,7 +7,7 @@ class magane {
 
 	getDescription() { return 'Bringing LINE stickers to Discord in a chaotic way.'; }
 
-	getVersion() { return '0.1.1'; }
+	getVersion() { return '0.1.2'; }
 
 	getAuthor() { return 'Kana'; }
 

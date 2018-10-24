@@ -266,7 +266,7 @@ export default {
 			});
 		},
 		deletePack(id) {
-			if (!id || !id.startsWith('startswith-') || !id.startsWith('custom-')) {
+			if (!id && !id.startsWith('startswith-') && !id.startsWith('custom-')) {
 				return `Id must start with either "startswith-" or "custom-"`;
 			}
 
