@@ -1,18 +1,59 @@
 # HOWTO
 
-Download: [https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js](https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js).
+## Downloads
+
+### BetterDiscord
+
+Plugin: [https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js](https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js).
+
+Install it the same way you install any other BetterDiscord plugins.
+
+> This plugin can not be cleanly unloaded yet, so you have to reload Discord if you ever want to disable it.
+
+
+### InjectMeDaddy
+
+With [InjectMeDaddy](https://github.com/anonymousthing/InjectMeDaddy/releases), click Add source, then populate the first input box with `Magane (Bobby's fork)` and the second input box with this URL:
+```
+https://cdn.jsdelivr.net/gh/BobbyWibowo/Magane@master/dist/stickers.min.js
+```
+Make sure the ticked checkbox is on Javascript, and you can leave Description empty.
+
+Untick the old Magane before injecting.
+
+### MyDiscord
+
+With [MyDiscord](https://github.com/justinoboyle/mydiscord), add the following URL into the **plugins array**:
+```
+https://cdn.jsdelivr.net/gh/BobbyWibowo/Magane@master/dist/stickers.min.js
+```
+
+### Without installing anything
+
+Open DevTools in Discord (**Ctrl + Shift + i** or **CMD + Option + i**), then run the following line in Console:
+```js
+document.head.appendChild(document.createElement('script').setAttribute('src', 'https://cdn.jsdelivr.net/gh/BobbyWibowo/Magane@master/dist/stickers.min.js'))
+```
+
+> This is more intended for trying purpose, as you will have to redo this step the next time you launch Discord.
+
+### Browser
+
+Unfortunately, I don't think it will work because the plugin needs to make an API call to `https://magane.moe` to download list of preset packs, but the browser version have a Content Security Policy that prevents network access to third-party domains.
+
+In fact, I think InjectMeDaddy had to patch Discord to allow HTTPS access to third-party domains to make it work.
+
+## Exposed console functions
 
 Magane now have 5 exposed functions that can be executed from the console:
 
-```js
-maganeAppendPack(title, firstid, count, animated)
-maganeAppendCustomPack(title, id, count, animated, template)
-maganeDeletePack(id)
-maganeSubcribeToPack(id)
-maganeUnsubscribeToPack(id)
-```
+* [maganeAppendPack(title, firstid, count, animated)](#maganeappendpacktitle-firstid-count-animated)
+* [maganeAppendCustomPack(title, id, count, animated, template)](#maganeappendcustompacktitle-id-count-animated-template)
+* [maganeDeletePack(id)](#maganedeletepackid)
+* [maganeSubcribeToPack(id)](#maganesubscribetopackid)
+* [maganeUnsubscribeToPack(id)](#maganeunsubscribetopackid)
 
-## maganeAppendPack(title, firstid, count, animated)
+### maganeAppendPack(title, firstid, count, animated)
 
 You can use `maganeAppendPack()` to add a new pack straight from LINE Store.
 
@@ -37,7 +78,7 @@ The ID should be pretty obvious from there, it's `19759616`.
 
 As for `count`, it's the count of how many stickers the pack have. Then after manually counting them you'll find that there are `8` stickers.
 
-### Sounds too complicated?
+#### Sounds too complicated?
 
 Don't worry, there's a much easier solution, and that would be to install this userscript: [https://greasyfork.org/en/scripts/373429-line-append-string](https://greasyfork.org/en/scripts/373429-line-append-string).
 
@@ -51,7 +92,7 @@ Just execute the line after `Console command:` in your Discord's console and be 
 >
 > ![Preview](https://i.fiery.me/5meI.png)
 
-## maganeAppendCustomPack(title, id, count, animated, template)
+### maganeAppendCustomPack(title, id, count, animated, template)
 
 This one is for the more advanced users. You can use this to add your own custom packs that are hosted anywhere remotely. Just gotta make sure the pictures can be hotlinked.
 
@@ -67,11 +108,11 @@ The plugin will use the provided template, then replace `%pack%` with the ID (`i
 
 The individual sticker IDs are expected to be `1, 2, ..., n`, a regular one-based index.
 
-The extensions will either be `.png` or `.gif`, depending on the state of `animated` (in the example I set it to `true` beacause the pack is animated).
+The extensions will either be `.png` or `.gif`, depending on the state of `animated` (in the example I set it to `true` because the pack is animated).
 
 So with this template, the plugin expects the stickers to be available at `https://i.fiery.me/stickers/bNOuvYDDWt/`, and they're named as `1.gif`, `2.gif`, ..., `24.gif`.
 
-## maganeDeletePack(id)
+### maganeDeletePack(id)
 
 It should be obvious, but this is used to delete custom pack.
 
@@ -93,20 +134,18 @@ So yeah, an example of deleting the panda sticker would be:
 maganeDeletePack('startswith-19759616')
 ```
 
-> You can actually delete built-in packs with this function, but you really shouldn't do that. Plus, I think they will be re-added the next time you start Discord or when you reload Magane.
-
-## maganeSubscribeToPack(id)
+### maganeSubscribeToPack(id)
 
 Susbcribe to pack. Please see note about IDs above.
 
-## maganeUnsubscribeToPack(id)
+### maganeUnsubscribeToPack(id)
 
 Unsubscribe to pack. Please see note about IDs above.
 
-## Extra: Custom packs
+## Bonus: Custom packs
 
 Here is my collection of custom packs: [https://gist.github.com/BobbyWibowo/666f45d386594df0c4f58edce367d67b](https://gist.github.com/BobbyWibowo/666f45d386594df0c4f58edce367d67b).
 
-## Extra: Custom CSS
+## Bonus: Custom CSS
 
-If you use [Beard's Material Design](https://github.com/BeardDesign1/Material-design-theme-ressources) theme, you may want to check out my custom CSS here: [https://gist.github.com/BobbyWibowo/36bac94a1acc9bc868c2fadb8bba7f45](https://gist.github.com/BobbyWibowo/36bac94a1acc9bc868c2fadb8bba7f45).
+If you use [Beard's Material Design](https://github.com/BeardDesign1/Material-design-theme-ressources) theme, you may want to check out my custom CSS here: [https://gist.github.com/BobbyWibowo/36bac94a1acc9bc868c2fadb8bba7f45](https://gist.github.com/BobbyWibowo/36bac94a1acc9bc868c2fadb8bba7f45). This only contain some cosmetic improvements to make it appear more faitful with the theme.
