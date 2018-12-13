@@ -11,7 +11,7 @@
 
 ### BetterDiscord
 
-Plugin: [https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js](https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js).
+Plugin: [https://blog.fiery.me/Magane/magane.plugin.js](https://blog.fiery.me/Magane/magane.plugin.js).
 
 Install it the same way you install any other BetterDiscord plugins.
 
@@ -22,7 +22,7 @@ Install it the same way you install any other BetterDiscord plugins.
 
 With [InjectMeDaddy](https://github.com/anonymousthing/InjectMeDaddy/releases), click Add source, then populate the first input box with `Magane (Bobby's fork)` and the second input box with this URL:
 ```
-https://cdn.jsdelivr.net/gh/BobbyWibowo/Magane@master/dist/stickers.min.js
+https://blog.fiery.me/Magane/dist/stickers.min.js
 ```
 Make sure the ticked checkbox is on Javascript, and you can leave Description empty.
 
@@ -32,14 +32,14 @@ Untick the old Magane before injecting.
 
 With [MyDiscord](https://github.com/justinoboyle/mydiscord), add the following URL into the **plugins array**:
 ```
-https://cdn.jsdelivr.net/gh/BobbyWibowo/Magane@master/dist/stickers.min.js
+https://blog.fiery.me/Magane/dist/stickers.min.js
 ```
 
 ### Without installing anything
 
 Open DevTools in Discord (**Ctrl + Shift + i** or **CMD + Option + i**), then run the following line in Console:
 ```js
-document.head.appendChild(document.createElement('script').setAttribute('src', 'https://cdn.jsdelivr.net/gh/BobbyWibowo/Magane@master/dist/stickers.min.js'))
+document.head.appendChild(document.createElement('script').setAttribute('src', 'https://blog.fiery.me/Magane/dist/stickers.min.js'))
 ```
 
 > This is more intended for trying purpose, as you will have to redo this step the next time you launch Discord.
