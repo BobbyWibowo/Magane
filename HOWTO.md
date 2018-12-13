@@ -148,4 +148,4 @@ Here is my collection of custom packs: [https://gist.github.com/BobbyWibowo/666f
 
 ## Bonus: Custom CSS
 
-If you use [Beard's Material Design](https://github.com/BeardDesign1/Material-design-theme-ressources) theme, you may want to check out my custom CSS here: [https://gist.github.com/BobbyWibowo/36bac94a1acc9bc868c2fadb8bba7f45](https://gist.github.com/BobbyWibowo/36bac94a1acc9bc868c2fadb8bba7f45). This only contain some cosmetic improvements to make it appear more faithful with the theme.
+If you use [Beard's Material Design](https://github.com/BeardDesign1/Material-design-theme-ressources) theme, you may want to check out my custom CSS here: [20-bmt-magane.css](https://github.com/BobbyWibowo/BobbyBDThemes/blob/master/assets/bmt/files/20-bmt-magane.css). This only contain some cosmetic improvements to make it appear more faithful with the theme.
