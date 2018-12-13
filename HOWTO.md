@@ -1,5 +1,12 @@
 # HOWTO
 
+## Table of Contents
+
+- [Downloads](#downloads)
+- [Exposed console functions](#exposed-console-functions)
+- [Bonus: Custom packs](#bonus-custom-packs)
+- [Bonus: Custom CSS](#bonus-custom-css)
+
 ## Downloads
 
 ### BetterDiscord
