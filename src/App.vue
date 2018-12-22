@@ -1,6 +1,9 @@
 <template>
 	<div id="magane">
-		<div class="channel-textarea-emoji channel-textarea-stickers" @click="stickerWindowActive = !stickerWindowActive"></div>
+		<div
+			class="channel-textarea-emoji channel-textarea-stickers"
+			v-bind:class="{ active: stickerWindowActive }"
+			@click="stickerWindowActive = !stickerWindowActive"></div>
 		<div class="stickerWindow" v-show="stickerWindowActive">
 			<!--<div class="handle" id="maganeDragHandle"></div>-->
 			<!--<div class="search">
@@ -176,10 +179,9 @@ export default {
 	},
 	methods: {
 		restoreDom() {
-			const appendableElement = document.querySelector('[class^="channelTextArea"] [class^="inner"]')
-			|| document.querySelector('.channel-textarea-inner');
+			const appendableElement = document.querySelector('[class^="channelTextArea"] [class^="inner"] [class^="pickerButtons"]');
 			if (appendableElement !== null) {
-				appendableElement.appendChild(this.$el);
+				appendableElement.insertAdjacentElement('afterbegin', this.$el);
 			}
 		},
 		getLocalStorage() {

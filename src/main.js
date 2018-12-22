@@ -21,7 +21,7 @@ function prepareDOM() {
 
 	const maganeContainer = document.createElement('div');
 	maganeContainer.id = 'maganeContainer';
-	appendableElement.appendChild(maganeContainer);
+	appendableElement.insertAdjacentElement('afterbegin', maganeContainer);
 
 	const vue = new Vue({
 		el: '#maganeContainer',
@@ -34,9 +34,8 @@ function prepareDOM() {
 	}
 }
 
-let loadTimer = setInterval(() => {
-	appendableElement = document.querySelector('[class^="channelTextArea-"] [class^="inner-"]')
-	|| document.querySelector('.channel-textarea-inner');
+const loadTimer = setInterval(() => {
+	appendableElement = document.querySelector('[class^="channelTextArea"] [class^="inner"] [class^="pickerButtons"]');
 	if (appendableElement !== null) {
 		clearInterval(loadTimer);
 		prepareDOM();

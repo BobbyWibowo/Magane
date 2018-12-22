@@ -7,7 +7,7 @@ class magane {
 
 	getDescription() { return 'Bringing LINE stickers to Discord in a chaotic way.'; }
 
-	getVersion() { return '0.1.2'; }
+	getVersion() { return '0.1.3'; }
 
 	getAuthor() { return 'Kana'; }
 
@@ -33,6 +33,7 @@ class magane {
 			console.log('Vue instance found, destroying\u2026');
 			console.log(this.vue);
 			this.vue.$destroy();
+			delete this.vue;
 		}
 
 		// Remove leftover from DOM
