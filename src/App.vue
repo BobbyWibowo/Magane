@@ -179,7 +179,7 @@ export default {
 	},
 	methods: {
 		restoreDom() {
-			const appendableElement = document.querySelector('[class^="channelTextArea"] [class^="inner"] [class^="pickerButtons"]');
+			const appendableElement = document.querySelector('[class^="channelTextArea"] [class^="inner"] [class^="buttons"]');
 			if (appendableElement !== null) {
 				appendableElement.insertAdjacentElement('afterbegin', this.$el);
 			}
