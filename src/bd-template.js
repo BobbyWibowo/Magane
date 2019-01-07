@@ -7,10 +7,11 @@ class magane {
 
 	getDescription() { return 'Bringing LINE stickers to Discord in a chaotic way.'; }
 
-	getVersion() { return '0.1.4'; }
+	getVersion() { return '0.1.5'; }
 
 	getAuthor() { return 'Kana'; }
 
+	// This is jank. I need an update checker. Someday. I don't know. Maybe.
 	getUpdateLink() { return 'https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js'; }
 
 	start() {
@@ -18,6 +19,10 @@ class magane {
 		const that = this;
 
 		// stickers.min.js
+
+		if (typeof ZLibrary === 'object') {
+			ZLibrary.PluginUpdater.checkForUpdate(this.getName(), this.getVersion(), this.getUpdateLink());
+		}
 	}
 
 	stop() {

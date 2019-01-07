@@ -1,9 +1,10 @@
 <template>
 	<div id="magane">
-		<div
-			class="channel-textarea-emoji channel-textarea-stickers"
+		<div class="channel-textarea-emoji channel-textarea-stickers"
 			v-bind:class="{ active: stickerWindowActive }"
-			@click="stickerWindowActive = !stickerWindowActive"></div>
+			@click="stickerWindowActive = !stickerWindowActive">
+			<div class="channel-textarea-stickers-content"></div>
+		</div>
 		<div class="stickerWindow" v-show="stickerWindowActive">
 			<!--<div class="handle" id="maganeDragHandle"></div>-->
 			<!--<div class="search">
@@ -142,7 +143,7 @@
 export default {
 	name: 'app',
 	mounted() {
-		console.log('Magane mounted on DOM');
+		console.log(`%c[Magane]%c`, 'color: #3a71c1; font-weight: 700', '', 'Mounted on DOM.');
 		window.maganeAppendPack = this.appendPack;
 		window.maganeAppendCustomPack = this.appendCustomPack;
 		window.maganeDeletePack = this.deletePack;
@@ -182,6 +183,7 @@ export default {
 			const appendableElement = document.querySelector('[class^="channelTextArea"] [class^="inner"] [class^="buttons"]');
 			if (appendableElement !== null) {
 				appendableElement.insertAdjacentElement('afterbegin', this.$el);
+				console.log(`%c[Magane]%c`, 'color: #3a71c1; font-weight: 700', '', 'Restored on DOM.');
 			}
 		},
 		getLocalStorage() {
@@ -192,8 +194,8 @@ export default {
 			this.token = this.localStorage.token;
 		},
 		_toast(message, options) {
-			if (!BdApi || typeof BdApi.showToast !== 'function') return;
-			return BdApi.showToast(message, options);
+			if (typeof BdApi.showToast === 'function')
+				BdApi.showToast(message, options);
 		},
 		_info(message, options = {}) {
 			options.type = 'info';
@@ -452,7 +454,6 @@ export default {
 			this._success('Added sticker to favorites.');
 		},
 		unfavoriteSticker(packId, sticker) {
-			console.log(packId, sticker);
 			const index = this.favoriteStickers.findIndex(s => s.id === sticker && s.pack === packId);
 			if (index === -1) return this._error('Sticker is not in favorites.');
 
@@ -486,7 +487,7 @@ export default {
 							large_threshold: 50
 						}
 					}));
-					console.log('Sucessful authenticated. You can now make REST request!');
+					console.log(`%c[Magane]%c`, 'color: #3a71c1; font-weight: 700', '', 'Sucessfully authenticated. You can now make REST request!');
 				} catch (error) {
 					console.error(error);
 				}
@@ -587,31 +588,52 @@ drag.prototype = {
 	$darkBackground: #202225;
 	$darkerBackground: #151617;
 
-	div.channel-textarea-stickers {
-		position: absolute;
-		top: 12px !important;
-		right: 45px;
-		// background-color: red;
-		background-image: url('/assets/f24711dae4f6d6b28335e866a93e9d9b.png');
-		width: 22px;
-		height: 22px;
-		background-position: -176px -396px;
-		background-size: 924px 704px;
-		background-repeat: no-repeat;
-		transition: border-bottom-color .1s ease-in-out;
-		-webkit-filter: grayscale(100%);
-		filter: grayscale(100%);
-		cursor: pointer;
-		transition: all .2s ease;
+	div#magane {
+		position: relative;
+		height: 100%;
+		display: -webkit-box;
+		display: -ms-flexbox;
+		display: flex;
+		flex-direction: row;
 	}
 
-	div.channel-textarea-stickers:hover, div.channel-textarea-stickers.active {
-		transform: scale(1.275);
-		-webkit-transform: scale(1.275);
-		filter: grayscale(0%);
-		-webkit-filter: grayscale(0%);
-		opacity: 1;
+	div.channel-textarea-stickers {
+		position: relative;
+		width: auto;
+		padding: 6px;
+		-ms-flex-align: center;
+		-ms-flex-pack: center;
+		-webkit-box-align: center;
+		-webkit-box-pack: center;
+		align-items: center;
+		cursor: pointer;
+		display: -webkit-box;
+		display: -ms-flexbox;
+		display: flex;
+		justify-content: center;
+		max-height: 50px;
+		cursor: pointer;
+		-webkit-filter: grayscale(100%);
+		filter: grayscale(100%);
+		-webkit-transition: all .2s ease;
 		transition: all .2s ease;
+		opacity: 0.6;
+	}
+
+	div.channel-textarea-stickers:hover,
+	div.channel-textarea-stickers.active {
+		-webkit-transform: scale(1.275);
+		transform: scale(1.275);
+		-webkit-filter: grayscale(0%);
+		filter: grayscale(0%);
+		opacity: 1;
+	}
+
+	div.channel-textarea-stickers-content {
+		background-image: url('https://discordapp.com/assets/a42df564f00ed8bbca652dc9345d3834.svg');
+		background-size: 100%;
+		width: 22px;
+		height: 22px;
 	}
 
 	div#magane button,
@@ -644,11 +666,13 @@ drag.prototype = {
 		width: 600px;
 		min-height: 200px;
 		right: 0px;
-		bottom: 46px;
+		bottom: 59px;
 		position: absolute;
 		background: $darkBackground;
+		border-radius: 5px;
 		max-height: 600px;
 		overflow: hidden;
+		-webkit-transition: all .2s ease;
 		transition: all .2s ease;
 	}
 
@@ -660,6 +684,7 @@ drag.prototype = {
 		left: -3px;
 		top: -3px;
 		cursor: nw-resize;
+		-webkit-transform: rotateZ(180deg);
 		transform: rotateZ(180deg);
 	}
 
@@ -675,15 +700,20 @@ drag.prototype = {
 		pointer-events: none;
 	}
 
-	div#magane div.stickerWindow div.stickers > div.pack {
+	div#magane div.stickerWindow div.stickers>div.pack {
 		float: left;
+		display: -webkit-box;
+		display: -ms-flexbox;
 		display: flex;
+		-ms-flex-flow: wrap;
 		flex-flow: wrap;
+		-webkit-box-pack: center;
+		-ms-flex-pack: center;
 		justify-content: center;
 		padding: 25px;
 	}
 
-	div#magane div.stickerWindow div.stickers > div.pack span {
+	div#magane div.stickerWindow div.stickers>div.pack span {
 		display: block;
 		color: #d2d2d2;
 		width: 100%;
@@ -692,14 +722,14 @@ drag.prototype = {
 		margin: 10px 0px;
 	}
 
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker {
+	div#magane div.stickerWindow div.stickers>div.pack div.sticker {
 		width: 100px;
 		height: 100px;
 		float: left;
 		position: relative;
 	}
 
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.image {
+	div#magane div.stickerWindow div.stickers>div.pack div.sticker div.image {
 		background-position: center;
 		background-size: cover;
 		background-repeat: no-repeat;
@@ -708,62 +738,41 @@ drag.prototype = {
 		height: 100px;
 	}
 
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.addFavorite,
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.deleteFavorite {
+	div#magane div.stickerWindow div.stickers>div.pack div.sticker div.addFavorite,
+	div#magane div.stickerWindow div.stickers>div.pack div.sticker div.deleteFavorite {
 		width: 20px;
 		height: 20px;
 		position: absolute;
 		top: 3px;
 		right: 3px;
+		-webkit-transition: all .2s ease;
 		transition: all .2s ease;
 		display: none;
 		z-index: 2;
+		cursor: pointer;
 	}
 
-	/*
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.addFavorite {
-		bottom: 0;
-	}
-	*/
-
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.deleteFavorite {
-		/* top: 0px; */
+	div#magane div.stickerWindow div.stickers>div.pack div.sticker div.deleteFavorite {
+		-webkit-transform: rotateZ(45deg);
 		transform: rotateZ(45deg);
 	}
 
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker:hover div.addFavorite,
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker:hover div.deleteFavorite {
+	div#magane div.stickerWindow div.stickers>div.pack div.sticker:hover div.addFavorite,
+	div#magane div.stickerWindow div.stickers>div.pack div.sticker:hover div.deleteFavorite {
 		display: block;
 	}
 
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.addFavorite:hover {
+	div#magane div.stickerWindow div.stickers>div.pack div.sticker div.addFavorite:hover {
 		transform: scale(1.3);
 		-webkit-transform: scale(1.3);
 	}
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.deleteFavorite:hover {
+
+	div#magane div.stickerWindow div.stickers>div.pack div.sticker div.deleteFavorite:hover {
 		transform: scale(1.3) rotateZ(45deg);
 		-webkit-transform: scale(1.3) rotateZ(45deg);
 	}
 
-	/*
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.addFavorite:hover svg path:nth-child(1),
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.deleteFavorite:hover svg path:nth-child(1) {
-		transition: all .2s ease;
-		fill: white;
-	}
-
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.addFavorite:hover svg path:nth-child(2) {
-		transition: all .2s ease;
-		fill: green;
-	}
-
-	div#magane div.stickerWindow div.stickers > div.pack div.sticker div.deleteFavorite:hover svg path:nth-child(2) {
-		transition: all .2s ease;
-		fill: red;
-	}
-	*/
-
-	div#magane div.stickerWindow > div.packs {
+	div#magane div.stickerWindow>div.packs {
 		position: absolute;
 		bottom: 0;
 		width: 100%;
@@ -771,7 +780,7 @@ drag.prototype = {
 		background: $darkerBackground;
 	}
 
-	div#magane div.stickerWindow > div.packs div.pack {
+	div#magane div.stickerWindow>div.packs div.pack {
 		display: block;
 		height: 40px;
 		width: 40px;
@@ -782,16 +791,17 @@ drag.prototype = {
 		background-position: center;
 		background-size: cover;
 		background-repeat: no-repeat;
+		-webkit-transition: all .2s ease;
 		transition: all .2s ease;
 		-webkit-filter: grayscale(100%);
 		filter: grayscale(100%);
 	}
 
-	div#magane div.stickerWindow > div.packs div.pack:nth-of-type(1) {
+	div#magane div.stickerWindow>div.packs div.pack:nth-of-type(1) {
 		margin-left: 10px;
 	}
 
-	div#magane div.stickerWindow > div.packs div.pack > div {
+	div#magane div.stickerWindow>div.packs div.pack>div {
 		background-image: url('/assets/f24711dae4f6d6b28335e866a93e9d9b.png');
 		width: 22px;
 		height: 22px;
@@ -800,17 +810,19 @@ drag.prototype = {
 		margin-top: 8px;
 		margin-left: 9px;
 	}
-	div#magane div.stickerWindow > div.packs div.pack div.icon-favorite {
+
+	div#magane div.stickerWindow>div.packs div.pack div.icon-favorite {
 		background-position: -462px -132px;
 	}
-	div#magane div.stickerWindow > div.packs div.pack div.icon-plus {
+
+	div#magane div.stickerWindow>div.packs div.pack div.icon-plus {
 		background-position: -374px -484px;
 		-webkit-filter: invert(100%);
-				filter: invert(100%);
+		filter: invert(100%);
 	}
 
-	div#magane div.stickerWindow > div.packs div.pack:hover,
-	div#magane div.stickerWindow > div.packs div.pack.active {
+	div#magane div.stickerWindow>div.packs div.pack:hover,
+	div#magane div.stickerWindow>div.packs div.pack.active {
 		transform: scale(1.25);
 		-webkit-transform: scale(1.25);
 		-webkit-filter: grayscale(0%);
@@ -831,6 +843,8 @@ drag.prototype = {
 	div#magane div.stickersConfig div.pack {
 		width: calc(100% - 20px);
 		float: left;
+		display: -webkit-box;
+		display: -ms-flexbox;
 		display: flex;
 		margin-left: 20px;
 		margin-bottom: 10px;
@@ -840,6 +854,8 @@ drag.prototype = {
 	div#magane div.stickersConfig div.pack div.handle,
 	div#magane div.stickersConfig div.pack div.preview,
 	div#magane div.stickersConfig div.pack div.action {
+		-webkit-box-flex: 0;
+		-ms-flex: none;
 		flex: none;
 		width: 75px;
 		height: 75px;
@@ -864,12 +880,15 @@ drag.prototype = {
 		display: block;
 		margin-bottom: 6px;
 	}
+
 	div#magane div.stickersConfig div.pack div.action {
 		padding-top: 20px;
 		padding-left: 10px;
 	}
 
 	div#magane div.stickersConfig div.pack div.info {
+		-webkit-box-flex: 1;
+		-ms-flex: 1;
 		flex: 1;
 		padding: 14px;
 	}
@@ -940,7 +959,8 @@ drag.prototype = {
 		background-color: #883030;
 	}
 
-	div#magane a.button:hover, div#magane a.button.is-primary:hover {
+	div#magane a.button:hover,
+	div#magane a.button.is-primary:hover {
 		background-color: #4a425f;
 	}
 
@@ -963,7 +983,6 @@ drag.prototype = {
 		justify-content: center;
 		overflow: hidden;
 		position: fixed;
-
 	}
 
 	div#magane div.stickersModal .modal-background {
@@ -1004,8 +1023,11 @@ drag.prototype = {
 	div#magane div.stickersModal .inputQuery {
 		width: calc(100% - 20px);
 		float: left;
+		display: -webkit-box;
+		display: -ms-flexbox;
 		display: flex;
 		height: 36px;
+		-webkit-box-sizing: border-box;
 		box-sizing: border-box;
 		margin-left: 15px;
 		margin-bottom: 10px;
@@ -1066,7 +1088,6 @@ drag.prototype = {
 		position: fixed;
 		right: 20px;
 		top: 20px;
-
 		height: 32px;
 		max-height: 32px;
 		max-width: 32px;
@@ -1075,7 +1096,8 @@ drag.prototype = {
 		width: 32px;
 	}
 
-	div#magane .modal-close:before, .modal-close:after {
+	div#magane .modal-close:before,
+	.modal-close:after {
 		background-color: white;
 		content: "";
 		display: block;
@@ -1098,38 +1120,33 @@ drag.prototype = {
 		width: 2px;
 	}
 
-	div#magane .modal-close:hover, .modal-close:focus {
+	div#magane .modal-close:hover,
+	.modal-close:focus {
 		background-color: rgba(10, 10, 10, 0.3);
 	}
-
-
 </style>
 
 <style lang="scss">
-	iframe#localStorageIframe { display: none }
+	iframe#localStorageIframe {
+		display: none
+	}
 
 	$darkishBackground: #4b4c4e;
 	$darkBackground: #202225;
 
-	.vb > .vb-dragger {
+	.vb>.vb-dragger {
 		z-index: 2005;
 		width: 12px;
 		right: 0;
 	}
 
-	.vb > .vb-dragger > .vb-dragger-styler {
+	.vb>.vb-dragger>.vb-dragger-styler {
 		-webkit-backface-visibility: hidden;
 		backface-visibility: hidden;
-		-webkit-transform: rotate3d(0,0,0,0);
-		transform: rotate3d(0,0,0,0);
-		-webkit-transition:
-			background-color 100ms ease-out,
-			margin 100ms ease-out,
-			height 100ms ease-out;
-		transition:
-			background-color 100ms ease-out,
-			margin 100ms ease-out,
-			height 100ms ease-out;
+		-webkit-transform: rotate3d(0, 0, 0, 0);
+		transform: rotate3d(0, 0, 0, 0);
+		-webkit-transition: background-color 100ms ease-out, margin 100ms ease-out, height 100ms ease-out;
+		transition: background-color 100ms ease-out, margin 100ms ease-out, height 100ms ease-out;
 		background-color: $darkBackground;
 		margin: 5px 5px 5px 0;
 		border-radius: 20px;
@@ -1137,24 +1154,23 @@ drag.prototype = {
 		display: block;
 	}
 
-	.vb.vb-scrolling-phantom > .vb-dragger > .vb-dragger-styler {
+	.vb.vb-scrolling-phantom>.vb-dragger>.vb-dragger-styler {
 		background-color: $darkishBackground;
 	}
 
-	.vb > .vb-dragger:hover > .vb-dragger-styler {
-		background-color: $darkishBackground;
-		margin: 0px;
-		height: 100%;
-	}
-
-	.vb.vb-dragging > .vb-dragger > .vb-dragger-styler {
+	.vb>.vb-dragger:hover>.vb-dragger-styler {
 		background-color: $darkishBackground;
 		margin: 0px;
 		height: 100%;
 	}
 
-	.vb.vb-dragging-phantom > .vb-dragger > .vb-dragger-styler {
+	.vb.vb-dragging>.vb-dragger>.vb-dragger-styler {
 		background-color: $darkishBackground;
+		margin: 0px;
+		height: 100%;
 	}
 
+	.vb.vb-dragging-phantom>.vb-dragger>.vb-dragger-styler {
+		background-color: $darkishBackground;
+	}
 </style>
