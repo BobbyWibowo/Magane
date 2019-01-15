@@ -17,7 +17,7 @@ let appendableElement = null;
 function prepareDOM() {
 	// Remove old elements, when reloaded by BetterDiscord
 	const old = appendableElement.querySelectorAll('div#magane');
-	if (old.length) { old.forEach(e => e.remove()); }
+	if (old.length) old.forEach(e => e.remove());
 
 	const maganeContainer = document.createElement('div');
 	maganeContainer.id = 'maganeContainer';

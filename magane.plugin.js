@@ -1,13 +1,13 @@
 //META{"name":"magane"}*//
 
-/* global BdApi */
+/* global BdApi, ZLibrary */
 // eslint-disable-next-line no-unused-vars
 class magane {
 	getName() { return 'Magane'; }
 
 	getDescription() { return 'Bringing LINE stickers to Discord in a chaotic way.'; }
 
-	getVersion() { return '0.1.6'; }
+	getVersion() { return '0.1.7'; }
 
 	getAuthor() { return 'Kana'; }
 
@@ -15,7 +15,7 @@ class magane {
 	getUpdateLink() { return 'https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js'; }
 
 	start() {
-		// eslint-disable-next-line no-unused-vars
+		// eslint-disable-next-line no-unused-vars, consistent-this
 		const that = this;
 
 		// stickers.min.js
@@ -29,7 +29,11 @@ var to=Object.freeze({}),eo=Object.prototype.toString,no=p("slot,component",!0),
 //# sourceMappingURL=stickers.min.js.map
 
 		if (typeof ZLibrary === 'object') {
-			ZLibrary.PluginUpdater.checkForUpdate(this.getName(), this.getVersion(), this.getUpdateLink());
+			try {
+				ZLibrary.PluginUpdater.checkForUpdate(this.getName(), this.getVersion(), this.getUpdateLink());
+			} catch (error) {
+				console.error(error);
+			}
 		}
 	}
 
