@@ -7,7 +7,7 @@ class magane {
 
 	getDescription() { return 'Bringing LINE stickers to Discord in a chaotic way.'; }
 
-	getVersion() { return '0.1.5'; }
+	getVersion() { return '0.1.6'; }
 
 	getAuthor() { return 'Kana'; }
 
@@ -29,8 +29,12 @@ class magane {
 		// FIXME: Figure out how to cleanly unload the plugin
 
 		if (BdApi && typeof BdApi.showToast === 'function') {
-			// eslint-disable-next-line max-len
-			BdApi.showToast('Magane still can not be cleanly unloaded, please reload your Discord to reload the plugin!', { type: 'error', timeout: 6000 });
+			try {
+				// eslint-disable-next-line max-len
+				BdApi.showToast('Magane still can not be cleanly unloaded, please reload your Discord to reload the plugin!', { type: 'error', timeout: 6000 });
+			} catch (error) {
+				console.error(error);
+			}
 		}
 
 		// Destroy vue instance

@@ -194,8 +194,12 @@ export default {
 			this.token = this.localStorage.token;
 		},
 		_toast(message, options) {
-			if (typeof BdApi.showToast === 'function')
-				BdApi.showToast(message, options);
+			if (BdApi && typeof BdApi.showToast === 'function')
+				try {
+					BdApi.showToast(message, options);
+				} catch (error) {
+					console.error(error);
+				}
 		},
 		_info(message, options = {}) {
 			options.type = 'info';
