@@ -97,7 +97,10 @@
 
 					<div v-bar class="vuebar-element">
 						<div class="tabContent" v-show="activeTab == 0">
-							<input class="inputQuery" type="text" v-bind:value="filterSubQuery" v-on:input="filterSubQuery = $event.target.value" v-on:click="focus" placeholder="Search"/>
+							<input class="inputQuery" type="text" placeholder="Search"
+								v-bind:value="filterSubQuery"
+								v-on:input="filterSubQuery = $event.target.value"
+								v-on:click="focus"/>
 							<div class="pack" v-for="pack in filteredSubs" v-bind:key="pack.id">
 								<div class="preview"
 									v-bind:style="{ 'background-image': 'url(' + formatURL(pack.id, pack.files[0]) + ')' }">
@@ -116,7 +119,10 @@
 
 					<div v-bar class="vuebar-element">
 						<div class="tabContent" v-show="activeTab == 1">
-							<input class="inputQuery" type="text" v-bind:value="filterPackQuery" v-on:input="filterPackQuery = $event.target.value" v-on:click="focus" placeholder="Search"/>
+							<input class="inputQuery" type="text" placeholder="Search"
+								v-bind:value="filterPackQuery"
+								v-on:input="filterPackQuery = $event.target.value"
+								v-on:click="focus"/>
 							<div class="pack" v-for="pack in filteredPacks" v-bind:key="pack.id">
 								<div class="preview"
 									v-bind:style="{ 'background-image': 'url(' + formatURL(pack.id, pack.files[0]) + ')' }">

@@ -71,14 +71,16 @@
         "single"
       ]
     },
-    "overrides": {
-      "files": [
-        "src/bd-template.js"
-      ],
-      "rules": {
-        "spaced-comment": 0
+    "overrides": [
+      {
+        "files": [
+          "src/bd-template.js"
+        ],
+        "rules": {
+          "spaced-comment": 0
+        }
       }
-    }
+    ]
   },
   "eslintIgnore": [
     "magane.plugin.js"
