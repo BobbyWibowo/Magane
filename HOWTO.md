@@ -39,7 +39,7 @@ https://blog.fiery.me/Magane/dist/stickers.min.js
 
 Open DevTools in Discord (**Ctrl + Shift + i** or **CMD + Option + i**), then run the following line in Console:
 ```js
-document.head.appendChild(document.createElement('script').setAttribute('src', 'https://blog.fiery.me/Magane/dist/stickers.min.js'))
+document.head.appendChild(document.createElement('script'))setAttribute('src', 'https://blog.fiery.me/Magane/dist/stickers.min.js')
 ```
 
 > This is more intended for trying purpose, as you will have to redo this step the next time you launch Discord.
