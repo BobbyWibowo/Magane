@@ -61,6 +61,11 @@
     "rules": {
       "camelcase": 0,
       "capitalized-comments": 0,
+      "curly": [
+        "error",
+        "multi",
+        "consistent"
+      ],
       "func-names": 0,
       "id-length": 0,
       "no-console": 0,

@@ -1,8 +1,7 @@
 /* global that */
 
-if (!global || !global._babelPolyfill) {
+if (!global || !global._babelPolyfill)
 	require('babel-polyfill');
-}
 
 import Vue from 'vue';
 import App from './App.vue';
@@ -25,13 +24,12 @@ function prepareDOM() {
 
 	const vue = new Vue({
 		el: '#maganeContainer',
-		render: h => h(App)
+		render: ce => ce(App)
 	});
 
 	// BD plugin only
-	if (typeof that !== 'undefined') {
+	if (typeof that !== 'undefined')
 		that.vue = vue;
-	}
 }
 
 const loadTimer = setInterval(() => {

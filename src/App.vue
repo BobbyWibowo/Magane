@@ -1,5 +1,5 @@
 <template>
-	<div id="magane">
+	<div v-if="!maganeDestroyed" id="magane">
 		<div class="channel-textarea-emoji channel-textarea-stickers"
 			v-bind:class="{ active: stickerWindowActive }"
 			@click="stickerWindowActive = !stickerWindowActive">
@@ -159,7 +159,7 @@ export default {
 		this.checkAuth();
 		this.grabPacks();
 		// registerResize();
-		setInterval(() => {
+		this.restoreDomInterval = setInterval(() => {
 			if (window.location.href !== this.lastKnownLocation) {
 				this.lastKnownLocation = window.location.href;
 				this.restoreDom();
@@ -181,7 +181,9 @@ export default {
 			activeTab: 0,
 			lastKnownLocation: null,
 			filterPackQuery: '',
-			filterSubQuery: ''
+			filterSubQuery: '',
+			restoreDomInterval: null,
+			maganeDestroyed: false
 		};
 	},
 	methods: {
@@ -200,28 +202,24 @@ export default {
 			this.token = this.localStorage.token;
 		},
 		_toast(message, options) {
-			if (BdApi && typeof BdApi.showToast === 'function')
-				try {
-					BdApi.showToast(message, options);
-				} catch (error) {
-					console.error(error);
-				}
+			if (typeof that.showToast === 'function')
+				return that.showToast(message, options);
 		},
 		_info(message, options = {}) {
 			options.type = 'info';
-			this._toast(message, options);
+			return this._toast(message, options);
 		},
 		_success(message, options = {}) {
 			options.type = 'success';
-			this._toast(message, options);
+			return this._toast(message, options);
 		},
 		_error(message, options = {}) {
 			options.type = 'error';
-			this._toast(message, options);
+			return this._toast(message, options);
 		},
 		_warn(message, options = {}) {
 			options.type = 'warn';
-			this._toast(message, options);
+			return this._toast(message, options);
 		},
 		_appendPack(id, e) {
 			const availablePacks = this.localStorage.getItem('magane.available');
@@ -422,6 +420,8 @@ export default {
 			return url;
 		},
 		async sendSticker(packId, sticker, token = this.token) {
+			if (!token) return this._error('Failed to authenticate, please reload Discord!', { timeout: 6000 });
+
 			const channel = window.location.href.split('/').slice(-1)[0];
 			if (this.onCooldown) return this._error('Sending sticker is on cooldown!', { timeout: 1000 });
 
@@ -506,6 +506,10 @@ export default {
 		focus(event) {
 			event.stopPropagation();
 			// event.focus();
+		},
+		destroy() {
+			clearInterval(this.restoreDomInterval);
+			this.maganeDestroyed = true;
 		}
 	},
 	computed: {
