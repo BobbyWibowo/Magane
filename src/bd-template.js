@@ -7,32 +7,35 @@ class magane {
 
 	getDescription() { return 'Bringing LINE stickers to Discord in a chaotic way.'; }
 
-	getVersion() { return '0.1.9'; }
+	getVersion() { return '0.1.10'; }
 
 	getAuthor() { return 'Kana'; }
 
 	getUpdateLink() { return 'https://raw.githubusercontent.com/BobbyWibowo/Magane/master/magane.plugin.js'; }
 
+	initToastFunction() {
+		// First of all, try BetterDiscord API
+		if (BdApi && typeof BdApi.showToast === 'function')
+			this.toastFunction = (...args) => BdApi.showToast(...args);
+		// But prefer Zere's Library if it's loaded
+		if (ZLibrary && ZLibrary.Toasts && typeof ZLibrary.Toasts.show === 'function')
+			this.toastFunction = (...args) => ZLibrary.Toasts.show(...args);
+	}
+
 	showToast(content, options) {
-		if (typeof this.toastFunction === 'undefined') {
-			this.toastFunction = null;
-			// First of all, try BetterDiscord API
-			if (BdApi && typeof BdApi.showToast === 'function')
-				this.toastFunction = (...args) => BdApi.showToast(...args);
-			// But prefer Zere's Library if it's loaded
-			if (ZLibrary && ZLibrary.Toasts && typeof ZLibrary.Toasts.show === 'function')
-				this.toastFunction = (...args) => ZLibrary.Toasts.show(...args);
-		}
-		if (this.toastFunction === null)
-			return false;
 		try {
-			return this.toastFunction(content, options);
+			if (this.toastFunction)
+				return this.toastFunction(content, options);
 		} catch (error) {
-			return false;
+			console.error(error);
 		}
+		return console[options.type || 'log']('%c[Magane]%c', 'color: #3a71c1; font-weight: 700', '', content);
 	}
 
 	start() {
+		// Init toast function
+		this.initToastFunction();
+
 		// eslint-disable-next-line no-unused-vars, consistent-this
 		const that = this;
 

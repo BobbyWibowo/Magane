@@ -202,8 +202,11 @@ export default {
 			this.token = this.localStorage.token;
 		},
 		_toast(message, options) {
-			if (typeof that.showToast === 'function')
+			if (that && typeof that.showToast === 'function')
 				return that.showToast(message, options);
+
+			// We also have this fallback here if not a BD plugin
+			return console[options.type || 'log']('%c[Magane]%c', 'color: #3a71c1; font-weight: 700', '', content);
 		},
 		_info(message, options = {}) {
 			options.type = 'info';
