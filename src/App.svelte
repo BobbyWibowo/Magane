@@ -148,7 +148,8 @@
 	};
 
 	const coords = { top: 0, left: 0 };
-	const selectorTextArea = '[class^="channelTextArea_"]:not([class*="channelTextAreaDisabled_"])';
+	const selectorButtonsContainer = '[class*="-buttons"]';
+	const selectorTextArea = '[class*="-channelTextArea"]:not([class*="-channelTextAreaDisabled"])';
 	let main = null;
 	let base = null;
 	let forceHideMagane = false;
@@ -284,7 +285,7 @@
 	};
 
 	const mountButtonComponent = textArea => {
-		const buttonsContainer = textArea.querySelector('[class^="buttons"]');
+		const buttonsContainer = textArea.querySelector(selectorButtonsContainer);
 		const component = new Button({
 			target: buttonsContainer,
 			anchor: buttonsContainer.firstElementChild
@@ -318,7 +319,7 @@
 	const updateStickerWindowPosition = component => {
 		log('Updating window\'s position\u2026');
 
-		const buttonsContainer = component.textArea.querySelector('[class^="buttons"]');
+		const buttonsContainer = component.textArea.querySelector(selectorButtonsContainer);
 		const props = buttonsContainer.getBoundingClientRect();
 
 		coords.wbottom = (base.clientHeight - props.top) + 8;
@@ -347,7 +348,7 @@
 		const textAreas = await waitFor(selectorTextArea, {
 			logname: 'textarea',
 			// Ensure that the textArea element has a buttons container
-			assert: element => Boolean(element.querySelector('[class^="buttons"]')),
+			assert: element => Boolean(element.querySelector(selectorButtonsContainer)),
 			multiple: true
 		});
 
